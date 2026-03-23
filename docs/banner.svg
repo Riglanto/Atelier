@@ -1,0 +1,165 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 200" width="800" height="200">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0a0a0f"/>
+      <stop offset="50%" stop-color="#0f0f1a"/>
+      <stop offset="100%" stop-color="#0a0a0f"/>
+    </linearGradient>
+    <linearGradient id="title-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ff6b6b">
+        <animate attributeName="stop-color" values="#ff6b6b;#ffd93d;#6bffb8;#6bb5ff;#c96bff;#ff6b6b" dur="6s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="25%" stop-color="#ffd93d">
+        <animate attributeName="stop-color" values="#ffd93d;#6bffb8;#6bb5ff;#c96bff;#ff6b6b;#ffd93d" dur="6s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="50%" stop-color="#6bffb8">
+        <animate attributeName="stop-color" values="#6bffb8;#6bb5ff;#c96bff;#ff6b6b;#ffd93d;#6bffb8" dur="6s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="75%" stop-color="#6bb5ff">
+        <animate attributeName="stop-color" values="#6bb5ff;#c96bff;#ff6b6b;#ffd93d;#6bffb8;#6bb5ff" dur="6s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="100%" stop-color="#c96bff">
+        <animate attributeName="stop-color" values="#c96bff;#ff6b6b;#ffd93d;#6bffb8;#6bb5ff;#c96bff" dur="6s" repeatCount="indefinite"/>
+      </stop>
+    </linearGradient>
+    <linearGradient id="nft-fill" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ff6b6b"/>
+      <stop offset="33%" stop-color="#ffd93d"/>
+      <stop offset="66%" stop-color="#6bffb8"/>
+      <stop offset="100%" stop-color="#c96bff"/>
+    </linearGradient>
+    <linearGradient id="bridge-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ff6b6b" stop-opacity="0.6"/>
+      <stop offset="50%" stop-color="#c96bff" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#6bb5ff" stop-opacity="0.6"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="glow-strong">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="nft-glow">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <style>
+    @keyframes dash-flow {
+      to { stroke-dashoffset: -24; }
+    }
+    @keyframes nft-travel {
+      0% { transform: translate(185px, 128px) scale(1); opacity: 1; }
+      10% { transform: translate(220px, 118px) scale(0.9); opacity: 1; }
+      50% { transform: translate(400px, 108px) scale(0.7); opacity: 0.9; }
+      90% { transform: translate(570px, 118px) scale(0.9); opacity: 1; }
+      100% { transform: translate(595px, 128px) scale(1); opacity: 1; }
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 0.4; }
+      50% { opacity: 1; }
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-3px); }
+    }
+    .bridge-line {
+      stroke-dasharray: 8 4;
+      animation: dash-flow 1.5s linear infinite;
+    }
+    .nft-packet {
+      animation: nft-travel 4s ease-in-out infinite;
+    }
+    .pulse-dot {
+      animation: pulse 2s ease-in-out infinite;
+    }
+    .tagline {
+      animation: pulse 3s ease-in-out infinite;
+    }
+  </style>
+
+  <!-- Background -->
+  <rect width="800" height="200" fill="url(#bg)"/>
+
+  <!-- Subtle grid pattern -->
+  <g opacity="0.05">
+    <line x1="0" y1="50" x2="800" y2="50" stroke="#fff" stroke-width="0.5"/>
+    <line x1="0" y1="100" x2="800" y2="100" stroke="#fff" stroke-width="0.5"/>
+    <line x1="0" y1="150" x2="800" y2="150" stroke="#fff" stroke-width="0.5"/>
+    <line x1="200" y1="0" x2="200" y2="200" stroke="#fff" stroke-width="0.5"/>
+    <line x1="400" y1="0" x2="400" y2="200" stroke="#fff" stroke-width="0.5"/>
+    <line x1="600" y1="0" x2="600" y2="200" stroke="#fff" stroke-width="0.5"/>
+  </g>
+
+  <!-- Title -->
+  <text x="400" y="52" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="30" font-weight="700" fill="url(#title-grad)" filter="url(#glow)">Atelier</text>
+
+  <!-- Subtitle -->
+  <text x="400" y="75" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="12" fill="#666">AI-Generated Art x LayerZero V2 x Cross-Chain Marketplace</text>
+
+  <!-- BASE chain node -->
+  <g filter="url(#glow)">
+    <rect x="100" y="100" width="120" height="50" rx="10" fill="#12121a" stroke="#ff6b6b" stroke-width="1.5"/>
+    <text x="160" y="122" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="14" font-weight="700" fill="#ff6b6b">BASE</text>
+    <text x="160" y="139" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="9" fill="#888">Mint + Gallery</text>
+  </g>
+
+  <!-- ARBITRUM chain node -->
+  <g filter="url(#glow)">
+    <rect x="580" y="100" width="120" height="50" rx="10" fill="#12121a" stroke="#6bb5ff" stroke-width="1.5"/>
+    <text x="640" y="122" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="14" font-weight="700" fill="#6bb5ff">ARBITRUM</text>
+    <text x="640" y="139" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="9" fill="#888">Destination</text>
+  </g>
+
+  <!-- Bridge dashed line -->
+  <line x1="225" y1="125" x2="575" y2="125" stroke="url(#bridge-grad)" stroke-width="2" class="bridge-line"/>
+
+  <!-- LayerZero V2 label on bridge -->
+  <rect x="355" y="93" width="90" height="18" rx="9" fill="#1a1a2e" stroke="#333" stroke-width="0.5"/>
+  <text x="400" y="105" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="8" fill="#c96bff">LayerZero V2</text>
+
+  <!-- Traveling NFT packet -->
+  <g class="nft-packet" filter="url(#nft-glow)">
+    <rect x="-10" y="-10" width="20" height="20" rx="3" fill="url(#nft-fill)" stroke="#fff" stroke-width="0.5" opacity="0.9"/>
+    <rect x="-6" y="-6" width="12" height="12" rx="1" fill="none" stroke="#fff" stroke-width="0.5" opacity="0.5"/>
+  </g>
+
+  <!-- Small decorative NFT frames on Base side -->
+  <g opacity="0.3">
+    <rect x="80" y="108" width="12" height="12" rx="2" fill="#ff6b6b" stroke="#ff6b6b" stroke-width="0.5"/>
+    <rect x="80" y="126" width="12" height="12" rx="2" fill="#ffd93d" stroke="#ffd93d" stroke-width="0.5"/>
+  </g>
+
+  <!-- Small decorative NFT frame arriving on Arbitrum side -->
+  <g opacity="0.3">
+    <rect x="708" y="118" width="12" height="12" rx="2" fill="#6bb5ff" stroke="#6bb5ff" stroke-width="0.5"/>
+  </g>
+
+  <!-- Pulse dots along bridge -->
+  <circle cx="290" cy="125" r="2" fill="#c96bff" class="pulse-dot" opacity="0.5"/>
+  <circle cx="400" cy="125" r="2" fill="#c96bff" class="pulse-dot" opacity="0.5" style="animation-delay: 0.7s"/>
+  <circle cx="510" cy="125" r="2" fill="#c96bff" class="pulse-dot" opacity="0.5" style="animation-delay: 1.4s"/>
+
+  <!-- Tagline -->
+  <text x="400" y="178" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="13" fill="#888" class="tagline">Autonomous art, any chain.</text>
+
+  <!-- Stats bar -->
+  <g font-family="'Segoe UI', Arial, sans-serif" font-size="9" fill="#555">
+    <text x="200" y="195" text-anchor="middle">9 tests passing</text>
+    <text x="400" y="195" text-anchor="middle">3 contracts</text>
+    <text x="600" y="195" text-anchor="middle">150+ chains</text>
+  </g>
+</svg>

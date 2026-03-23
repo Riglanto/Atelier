@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Atelier — Architecture</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', -apple-system, sans-serif; background: #0a0a0f; color: #e0e0e0; overflow-x: hidden; line-height: 1.5; }
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: #0a0a0f; }
+  ::-webkit-scrollbar-thumb { background: #2a2a3a; border-radius: 3px; }
+
+  .hero { text-align: center; padding: 60px 20px 20px; background: radial-gradient(ellipse at 50% 0%, rgba(201,107,255,0.08) 0%, transparent 60%); }
+  .nav { padding: 16px 24px; }
+  .nav a { color: #666; text-decoration: none; font-size: 0.85rem; transition: color 0.2s; }
+  .nav a:hover { color: #c96bff; }
+  .hero h1 { font-size: 2.4rem; background: linear-gradient(135deg, #ff6b6b, #ffd93d, #6bffb8, #6bb5ff, #c96bff); background-size: 300%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: gradient 4s ease infinite; }
+  .hero p { color: #888; margin-top: 12px; font-size: 1.1rem; max-width: 600px; margin-left: auto; margin-right: auto; }
+  @keyframes gradient { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+
+  .stats { display: flex; justify-content: center; gap: 48px; padding: 30px 20px 40px; flex-wrap: wrap; }
+  .stat { text-align: center; }
+  .stat-value { font-size: 2.2rem; font-weight: 700; color: #fff; }
+  .stat-label { font-size: 0.75rem; color: #666; margin-top: 4px; text-transform: uppercase; letter-spacing: 1px; }
+
+  /* Gallery simulation */
+  .gallery-sim { max-width: 960px; margin: 0 auto; padding: 0 20px 40px; }
+  .gallery-sim h2 { font-size: 1.3rem; color: #fff; margin-bottom: 16px; text-align: center; }
+  .nft-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
+  .nft-card {
+    background: #12121a; border: 1px solid #2a2a3a; border-radius: 14px; overflow: hidden;
+    transition: transform 0.2s, border-color 0.3s; cursor: pointer;
+  }
+  .nft-card:hover { transform: translateY(-5px); border-color: #555; box-shadow: 0 8px 30px rgba(201,107,255,0.08); }
+  .nft-art {
+    width: 100%; aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+    font-size: 3rem; position: relative; overflow: hidden;
+  }
+  .nft-art canvas { width: 100%; height: 100%; }
+  .nft-info { padding: 14px; }
+  .nft-title { font-size: 0.9rem; color: #fff; font-weight: 600; }
+  .nft-meta { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
+  .nft-price { color: #6bffb8; font-weight: 700; font-size: 0.9rem; }
+  .nft-chain { font-size: 0.7rem; color: #666; background: #1a1a2e; padding: 3px 8px; border-radius: 4px; }
+  .nft-status { font-size: 0.7rem; margin-top: 6px; }
+  .nft-status.listed { color: #ffd93d; }
+  .nft-status.sold { color: #ff6b6b; }
+  .nft-status.bridged { color: #6bb5ff; }
+
+  /* Architecture diagram */
+  .arch { max-width: 960px; margin: 40px auto; padding: 0 20px; }
+  .arch h2 { font-size: 1.5rem; margin-bottom: 24px; text-align: center; color: #fff; }
+
+  .chain-row { display: flex; gap: 24px; justify-content: center; flex-wrap: wrap; margin-bottom: 24px; }
+
+  .chain-card {
+    background: #12121a; border: 1px solid #2a2a3a; border-radius: 14px; padding: 24px;
+    flex: 1; min-width: 280px; max-width: 440px; position: relative;
+  }
+  .chain-card.primary { border-top: 3px solid #ff6b6b; }
+  .chain-card.secondary { border-top: 3px solid #6bb5ff; }
+
+  .chain-name { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 2px; font-weight: 600; margin-bottom: 16px; }
+  .chain-card.primary .chain-name { color: #ff6b6b; }
+  .chain-card.secondary .chain-name { color: #6bb5ff; }
+
+  .contract-block {
+    background: #1a1a2e; border-radius: 10px; padding: 14px; margin: 10px 0;
+    border-left: 3px solid #333; cursor: pointer; transition: all 0.2s;
+  }
+  .contract-block:hover { border-left-color: #ff6b6b; transform: translateX(3px); }
+  .contract-block.open { border-left-color: #6bffb8; background: #1a1a30; }
+  .contract-block h3 { font-size: 0.9rem; color: #fff; }
+  .contract-block .tags { margin-top: 4px; }
+  .contract-block .tag { font-size: 0.65rem; background: #2a2a4a; padding: 2px 7px; border-radius: 4px; color: #aaa; display: inline-block; margin-right: 4px; }
+  .contract-block .detail { display: none; margin-top: 10px; }
+  .contract-block.open .detail { display: block; }
+  .fn-sig { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: #c96bff; padding: 3px 0; }
+  .fn-desc { font-size: 0.75rem; color: #666; margin-left: 12px; }
+
+  /* Bridge arrow */
+  .bridge-arrow {
+    text-align: center; padding: 16px; color: #444; font-size: 0.75rem;
+    text-transform: uppercase; letter-spacing: 2px;
+  }
+  .bridge-arrow .arrow-svg { margin: 8px auto; display: block; }
+
+  /* Flows */
+  .flows { max-width: 960px; margin: 50px auto; padding: 0 20px; }
+  .flows h2 { font-size: 1.5rem; margin-bottom: 24px; text-align: center; color: #fff; }
+
+  .flow-tabs { display: flex; gap: 8px; justify-content: center; margin-bottom: 24px; flex-wrap: wrap; }
+  .flow-tab {
+    padding: 8px 20px; border-radius: 8px; border: 1px solid #2a2a3a; background: #12121a;
+    color: #888; cursor: pointer; font-size: 0.85rem; transition: all 0.2s;
+  }
+  .flow-tab:hover { border-color: #555; color: #fff; }
+  .flow-tab.active { background: #1a1a30; border-color: #c96bff; color: #fff; }
+
+  .flow-panel { display: none; }
+  .flow-panel.active { display: block; }
+
+  .flow-step {
+    display: flex; gap: 16px; align-items: flex-start; padding: 16px; margin: 12px 0;
+    background: #12121a; border: 1px solid #1a1a2a; border-radius: 10px;
+  }
+  .flow-step .num {
+    min-width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 0.9rem; background: #1a1a2e; color: #c96bff; flex-shrink: 0;
+  }
+  .flow-step h3 { font-size: 0.9rem; color: #fff; }
+  .flow-step p { font-size: 0.8rem; color: #777; margin-top: 4px; line-height: 1.4; }
+  .flow-step code { background: #1a1a2e; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; color: #c96bff; }
+
+  .connector { text-align: center; color: #333; font-size: 0.8rem; }
+
+  /* Tracks */
+  .tracks { max-width: 960px; margin: 50px auto; padding: 0 20px 60px; }
+  .tracks h2 { font-size: 1.5rem; margin-bottom: 20px; text-align: center; color: #fff; }
+  .track-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; }
+  .track-card {
+    background: #12121a; border: 1px solid #2a2a3a; border-radius: 12px; padding: 20px;
+    transition: border-color 0.3s;
+  }
+  .track-card:hover { border-color: #c96bff; }
+  .track-card h3 { font-size: 0.9rem; color: #fff; }
+  .track-card .prize { font-size: 1.3rem; font-weight: 700; color: #6bffb8; margin: 8px 0; }
+  .track-card p { font-size: 0.8rem; color: #666; line-height: 1.4; }
+
+  .footer { text-align: center; padding: 50px 20px 30px; color: #333; font-size: 0.8rem; }
+  .footer a { color: #555; text-decoration: none; }
+  .footer a:hover { color: #c96bff; }
+
+  @media (max-width: 768px) { .hero h1 { font-size: 1.6rem; } .chain-row { flex-direction: column; } }
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <a href="how-it-works.html">How It Works</a>
+</div>
+
+<div class="hero">
+  <h1>Atelier</h1>
+  <p>Autonomous art, any chain. An AI artist that creates, learns, and trades cross-chain NFTs.</p>
+</div>
+
+<div class="stats">
+  <div class="stat"><div class="stat-value">9</div><div class="stat-label">Tests Passing</div></div>
+  <div class="stat"><div class="stat-value">3</div><div class="stat-label">Contracts</div></div>
+  <div class="stat"><div class="stat-value">150+</div><div class="stat-label">Target Chains</div></div>
+  <div class="stat"><div class="stat-value">1 tx</div><div class="stat-label">Buy + Bridge</div></div>
+</div>
+
+<!-- Generative NFT Gallery Simulation -->
+<div class="gallery-sim">
+  <h2>Agent's Gallery</h2>
+  <div class="nft-grid" id="nft-grid"></div>
+</div>
+
+<!-- Architecture -->
+<div class="arch">
+  <h2>Architecture</h2>
+
+  <div class="chain-row">
+    <div class="chain-card primary">
+      <div class="chain-name">Base — Minting Chain</div>
+
+      <div class="contract-block" onclick="this.classList.toggle('open')">
+        <h3>AgentONFT721</h3>
+        <div class="tags"><span class="tag">OApp</span><span class="tag">ERC-721</span><span class="tag">LayerZero V2</span></div>
+        <div class="detail">
+          <div class="fn-sig">mint(address to, string uri) → uint256</div>
+          <div class="fn-desc">Owner/agent mints new NFT with IPFS metadata</div>
+          <div class="fn-sig">sendNFT(uint256 tokenId, uint32 dstEid, bytes options)</div>
+          <div class="fn-desc">Burn locally → send cross-chain → mint on destination</div>
+          <div class="fn-sig">sendNFTTo(uint256 tokenId, address to, uint32 dstEid, bytes options)</div>
+          <div class="fn-desc">Send to specific address on destination (used by Gallery)</div>
+          <div class="fn-sig">quoteSend(tokenId, dstEid, options) → MessagingFee</div>
+          <div class="fn-desc">Estimate LayerZero messaging fee</div>
+        </div>
+      </div>
+
+      <div class="contract-block" onclick="this.classList.toggle('open')">
+        <h3>Gallery</h3>
+        <div class="tags"><span class="tag">Marketplace</span></div>
+        <div class="detail">
+          <div class="fn-sig">listForSale(uint256 tokenId, uint256 price)</div>
+          <div class="fn-desc">List NFT with asking price</div>
+          <div class="fn-sig">buy(uint256 tokenId) payable</div>
+          <div class="fn-desc">Buy NFT on same chain</div>
+          <div class="fn-sig">buyAndBridge(tokenId, dstEid, options) payable</div>
+          <div class="fn-desc">Atomic: buy + cross-chain bridge in one tx</div>
+          <div class="fn-sig">cancelListing(uint256 tokenId)</div>
+          <div class="fn-desc">Remove listing (seller only)</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chain-card secondary">
+      <div class="chain-name">Arbitrum / Optimism — Destination</div>
+
+      <div class="contract-block" onclick="this.classList.toggle('open')">
+        <h3>AgentONFT721 (peer)</h3>
+        <div class="tags"><span class="tag">OApp</span><span class="tag">ERC-721</span></div>
+        <div class="detail">
+          <div class="fn-sig">_lzReceive(origin, guid, message, ...)</div>
+          <div class="fn-desc">Decodes (tokenId, to, uri) → mints NFT to buyer</div>
+          <div class="fn-sig">sendNFT(...) — can bridge back to Base</div>
+          <div class="fn-desc">NFTs can move freely between all peered chains</div>
+        </div>
+      </div>
+
+      <div style="padding: 20px; text-align: center; color: #444; font-size: 0.8rem; border: 1px dashed #222; border-radius: 10px; margin-top: 10px;">
+        NFT arrives here with same tokenId + URI.<br>
+        Buyer owns it on their preferred chain.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Flows -->
+<div class="flows">
+  <h2>Transaction Flows</h2>
+
+  <div class="flow-tabs">
+    <div class="flow-tab active" onclick="switchFlow('mint')">Mint</div>
+    <div class="flow-tab" onclick="switchFlow('buy')">Buy (same chain)</div>
+    <div class="flow-tab" onclick="switchFlow('bridge')">Buy + Bridge</div>
+    <div class="flow-tab" onclick="switchFlow('direct')">Direct Bridge</div>
+  </div>
+
+  <div class="flow-panel active" id="flow-mint">
+    <div class="flow-step"><div class="num">1</div><div><h3>Agent creates art</h3><p>AI generates image + metadata, uploads to IPFS, gets URI</p></div></div>
+    <div class="connector">↓</div>
+    <div class="flow-step"><div class="num">2</div><div><h3>Mint on-chain</h3><p>Agent calls <code>nft.mint(agentAddr, "ipfs://Qm...")</code> — auto-increments tokenId</p></div></div>
+    <div class="connector">↓</div>
+    <div class="flow-step"><div class="num">3</div><div><h3>List for sale</h3><p>Agent approves Gallery, calls <code>gallery.listForSale(tokenId, 0.1 ether)</code></p></div></div>
+  </div>
+
+  <div class="flow-panel" id="flow-buy">
+    <div class="flow-step"><div class="num">1</div><div><h3>Buyer finds NFT</h3><p>Browse Gallery listings — sees price, artist, metadata URI</p></div></div>
+    <div class="connector">↓</div>
+    <div class="flow-step"><div class="num">2</div><div><h3>Purchase</h3><p>Calls <code>gallery.buy{value: 0.1 ether}(tokenId)</code></p></div></div>
+    <div class="connector">↓</div>
+    <div class="flow-step"><div class="num">3</div><div><h3>Transfer + Payment</h3><p>NFT transfers from seller → buyer. ETH goes to seller. Excess refunded.</p></div></div>
+  </div>
+
+  <div class="flow-panel" id="flow-bridge">
+    <div class="flow-step"><div class="num">1</div><div><h3>Buyer on Arbitrum wants NFT listed on Base</h3><p>Calls <code>gallery.buyAndBridge{value: price + lzFee}(tokenId, arbEid, options)</code></p></div></div>
+    <div class="connector">↓</div>
+    <div class="flow-step"><div class="num">2</div><div><h3>Gallery buys from seller</h3><p>NFT transfers from seller → Gallery contract. Seller receives listing price.</p></div></div>
+    <div class="connector">↓</div>
+    <div class="flow-step"><div class="num">3</div><div><h3>Gallery bridges to buyer</h3><p>Gallery calls <code>nft.sendNFTTo(tokenId, buyer, arbEid)</code> — NFT burned on Base</p></div></div>
+    <div class="connector">↓</div>
+    <div class="flow-step"><div class="num">4</div><div><h3>LayerZero delivers</h3><p>DVNs verify. Executor calls <code>_lzReceive()</code> on Arbitrum. NFT minted to buyer. ~30s.</p></div></div>
+  </div>
+
+  <div class="flow-panel" id="flow-direct">
+    <div class="flow-step"><div class="num">1</div><div><h3>Owner decides to move NFT</h3><p>Quotes fee: <code>nft.quoteSend(tokenId, dstEid, options)</code></p></div></div>
+    <div class="connector">↓</div>
+    <div class="flow-step"><div class="num">2</div><div><h3>Send cross-chain</h3><p>Calls <code>nft.sendNFT{value: fee}(tokenId, dstEid, options)</code> — burns on source</p></div></div>
+    <div class="connector">↓</div>
+    <div class="flow-step"><div class="num">3</div><div><h3>Receive on destination</h3><p><code>_lzReceive()</code> mints same tokenId + URI to owner on destination chain</p></div></div>
+  </div>
+</div>
+
+<!-- Tracks -->
+<div class="tracks">
+  <h2>Target Hackathon Tracks</h2>
+  <div class="track-grid">
+    <div class="track-card">
+      <h3>SuperRare Partner Track</h3>
+      <div class="prize">$2,500</div>
+      <p>Autonomous agents minting & trading entirely on-chain. Infrastructure as creative medium.</p>
+    </div>
+    <div class="track-card">
+      <h3>ERC-8183 Open Build</h3>
+      <div class="prize">$2,000</div>
+      <p>Virtuals — Open track for ERC-8183 exploration across any application domain.</p>
+    </div>
+    <div class="track-card">
+      <h3>Synthesis Open Track</h3>
+      <div class="prize">$28,134</div>
+      <p>Community-funded open track. Any project qualifies. Largest single prize pool.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+// Generative art for NFT cards
+function generateArt(canvas, seed) {
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width = 300;
+  const h = canvas.height = 300;
+  const rand = (s) => { s = Math.sin(s) * 43758.5453; return s - Math.floor(s); };
+
+  const hue = (seed * 47) % 360;
+  const hue2 = (hue + 90 + rand(seed * 3) * 90) % 360;
+  const hue3 = (hue + 180 + rand(seed * 5) * 60) % 360;
+
+  // Gradient background
+  const bg = ctx.createLinearGradient(0, 0, w * rand(seed*2), h);
+  bg.addColorStop(0, `hsl(${hue}, 25%, 6%)`);
+  bg.addColorStop(1, `hsl(${hue2}, 20%, 10%)`);
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, w, h);
+
+  const shape = Math.floor(rand(seed * 99) * 6);
+
+  if (shape === 0) {
+    // Overlapping translucent circles — soft bokeh
+    for (let i = 0; i < 15; i++) {
+      const x = rand(seed+i*7.1)*w, y = rand(seed+i*13.3)*h;
+      const r = rand(seed+i*3.7)*70+15;
+      const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+      const ch = (hue + rand(seed+i*5.9)*150) % 360;
+      g.addColorStop(0, `hsla(${ch}, 80%, 60%, ${0.2+rand(seed+i*2.3)*0.3})`);
+      g.addColorStop(1, `hsla(${ch}, 60%, 40%, 0)`);
+      ctx.fillStyle = g;
+      ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI*2); ctx.fill();
+    }
+  } else if (shape === 1) {
+    // Triangles and diamonds
+    for (let i = 0; i < 10; i++) {
+      const cx = rand(seed+i*7)*w, cy = rand(seed+i*13)*h;
+      const sz = 30+rand(seed+i*3)*80;
+      const rot = rand(seed+i*23)*Math.PI;
+      const sides = 3 + Math.floor(rand(seed+i*17)*2); // 3 or 4
+      const ch = (hue + rand(seed+i*5.9)*120) % 360;
+      ctx.save(); ctx.translate(cx, cy); ctx.rotate(rot);
+      ctx.beginPath();
+      for (let s = 0; s <= sides; s++) {
+        const a = (s/sides)*Math.PI*2;
+        const px = Math.cos(a)*sz, py = Math.sin(a)*sz;
+        s === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+      }
+      ctx.closePath();
+      ctx.fillStyle = `hsla(${ch}, 70%, 55%, ${0.15+rand(seed+i*2)*0.25})`;
+      ctx.fill();
+      ctx.strokeStyle = `hsla(${ch}, 50%, 70%, ${0.2+rand(seed+i*4)*0.2})`;
+      ctx.lineWidth = 1.5; ctx.stroke();
+      ctx.restore();
+    }
+  } else if (shape === 2) {
+    // Concentric rings — different colors
+    const cx = w/2+(rand(seed*11)-0.5)*80, cy = h/2+(rand(seed*13)-0.5)*60;
+    for (let i = 12; i > 0; i--) {
+      const r = i*18+rand(seed+i)*15;
+      const ch = (hue + i*28 + rand(seed+i*7)*30) % 360;
+      ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2);
+      ctx.strokeStyle = `hsla(${ch}, 70%, 60%, ${0.12+rand(seed+i*3)*0.2})`;
+      ctx.lineWidth = 3+rand(seed+i*5)*6; ctx.stroke();
+    }
+    // Center glow
+    const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, 40);
+    g.addColorStop(0, `hsla(${hue3}, 80%, 70%, 0.4)`);
+    g.addColorStop(1, 'transparent');
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(cx, cy, 40, 0, Math.PI*2); ctx.fill();
+  } else if (shape === 3) {
+    // Flowing curves — thick colorful strokes
+    for (let i = 0; i < 12; i++) {
+      ctx.beginPath();
+      const x0 = rand(seed+i*11)*w, y0 = rand(seed+i*17)*h;
+      ctx.moveTo(x0, y0);
+      ctx.bezierCurveTo(
+        rand(seed+i*23)*w, rand(seed+i*29)*h,
+        rand(seed+i*31)*w, rand(seed+i*37)*h,
+        rand(seed+i*41)*w, rand(seed+i*43)*h
+      );
+      const ch = (hue + rand(seed+i*5)*160) % 360;
+      ctx.strokeStyle = `hsla(${ch}, 70%, 60%, ${0.2+rand(seed+i*2)*0.3})`;
+      ctx.lineWidth = 2+rand(seed+i*7)*8;
+      ctx.lineCap = 'round'; ctx.stroke();
+    }
+  } else if (shape === 4) {
+    // Grid of rounded squares — mondrian-ish
+    const sz = 30+Math.floor(rand(seed*11)*25);
+    const gap = 4;
+    for (let x = gap; x < w-gap; x += sz+gap) {
+      for (let y = gap; y < h-gap; y += sz+gap) {
+        const ch = (hue + rand(seed+x*0.1+y*0.3)*200) % 360;
+        const lit = 25+rand(seed+x*0.7+y*0.2)*40;
+        const alpha = 0.3+rand(seed+x+y)*0.5;
+        ctx.fillStyle = `hsla(${ch}, 60%, ${lit}%, ${alpha})`;
+        const r = 4+rand(seed+x*0.3+y*0.5)*4;
+        ctx.beginPath();
+        ctx.roundRect(x, y, sz, sz, r);
+        ctx.fill();
+      }
+    }
+  } else {
+    // Mixed — circles + rectangles + lines
+    for (let i = 0; i < 8; i++) {
+      const x = rand(seed+i*7.1)*w, y = rand(seed+i*13.3)*h;
+      const sz = rand(seed+i*3.7)*60+15;
+      const ch = (hue + rand(seed+i*5.9)*140) % 360;
+      const alpha = 0.15+rand(seed+i*2.3)*0.35;
+      ctx.fillStyle = `hsla(${ch}, 70%, 55%, ${alpha})`;
+      if (rand(seed+i) < 0.33) {
+        ctx.beginPath(); ctx.arc(x, y, sz/2, 0, Math.PI*2); ctx.fill();
+      } else if (rand(seed+i) < 0.66) {
+        ctx.save(); ctx.translate(x, y); ctx.rotate(rand(seed+i*9)*Math.PI);
+        ctx.fillRect(-sz/2, -sz/4, sz, sz/2); ctx.restore();
+      } else {
+        ctx.beginPath();
+        ctx.moveTo(x, y-sz/2); ctx.lineTo(x+sz/2, y+sz/2); ctx.lineTo(x-sz/2, y+sz/2);
+        ctx.closePath(); ctx.fill();
+      }
+    }
+    for (let i = 0; i < 6; i++) {
+      ctx.beginPath();
+      ctx.moveTo(rand(seed+i*41)*w, rand(seed+i*43)*h);
+      ctx.lineTo(rand(seed+i*47)*w, rand(seed+i*53)*h);
+      ctx.strokeStyle = `hsla(${(hue2+i*20)%360}, 60%, 65%, 0.25)`;
+      ctx.lineWidth = 1+rand(seed+i*59)*3; ctx.stroke();
+    }
+  }
+}
+
+const nfts = [
+  { id: 0, title: "Genesis Fragment #0", price: "0.15 ETH", chain: "Base", status: "listed", statusClass: "listed" },
+  { id: 1, title: "Quantum Drift #1", price: "0.22 ETH", chain: "Base", status: "listed", statusClass: "listed" },
+  { id: 2, title: "Neural Bloom #2", price: "—", chain: "Arbitrum", status: "bridged", statusClass: "bridged" },
+  { id: 3, title: "Void Echo #3", price: "0.08 ETH", chain: "Base", status: "sold", statusClass: "sold" },
+  { id: 4, title: "Prismatic Wave #4", price: "0.18 ETH", chain: "Base", status: "listed", statusClass: "listed" },
+  { id: 5, title: "Entropy Garden #5", price: "0.45 ETH", chain: "Optimism", status: "listed", statusClass: "listed" },
+];
+
+const grid = document.getElementById('nft-grid');
+nfts.forEach(nft => {
+  const card = document.createElement('div');
+  card.className = 'nft-card';
+  card.innerHTML = `
+    <div class="nft-art"><canvas id="art-${nft.id}"></canvas></div>
+    <div class="nft-info">
+      <div class="nft-title">${nft.title}</div>
+      <div class="nft-meta">
+        <span class="nft-price">${nft.price}</span>
+        <span class="nft-chain">${nft.chain}</span>
+      </div>
+      <div class="nft-status ${nft.statusClass}">${nft.status}</div>
+    </div>
+  `;
+  grid.appendChild(card);
+  setTimeout(() => generateArt(document.getElementById(`art-${nft.id}`), nft.id + 42), 0);
+});
+
+// Flow tab switching
+function switchFlow(name) {
+  document.querySelectorAll('.flow-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.flow-panel').forEach(p => p.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('flow-' + name).classList.add('active');
+}
+
+// Close contract details on outside click
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.contract-block')) {
+    document.querySelectorAll('.contract-block.open').forEach(c => c.classList.remove('open'));
+  }
+});
+</script>
+
+<div class="footer">
+  <p>Atelier &mdash; Built for <a href="#">The Synthesis</a> hackathon</p>
+  <p style="margin-top: 6px;"><a href="how-it-works.html">How It Works</a></p>
+</div>
+
+</body>
+</html>

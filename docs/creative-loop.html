@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Creative Feedback Loop — Atelier</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', -apple-system, sans-serif; background: #0a0a0f; color: #e0e0e0; overflow-x: hidden; }
+
+  .hero { text-align: center; padding: 50px 20px 10px; }
+  .hero h1 { font-size: 2.2rem; background: linear-gradient(135deg, #ff6b6b, #ffd93d, #6bffb8, #6bb5ff, #c96bff); background-size: 300%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: grad 5s ease infinite; }
+  .hero p { color: #666; margin-top: 10px; font-size: 0.95rem; }
+  .hero .sub { color: #444; font-size: 0.8rem; margin-top: 16px; }
+  @keyframes grad { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
+
+  .controls { text-align: center; padding: 16px; }
+  .play-btn { padding: 14px 44px; border-radius: 12px; border: 1px solid #c96bff; background: #c96bff22; color: #c96bff; font-size: 1rem; cursor: pointer; font-weight: 700; letter-spacing: 1px; transition: all 0.2s; }
+  .play-btn:hover { background: #c96bff44; }
+  .play-btn:disabled { opacity: 0.3; cursor: default; }
+  .narration { margin-top: 14px; font-size: 0.9rem; color: #555; min-height: 28px; transition: color 0.3s; }
+  .narration.active { color: #bbb; }
+
+  /* ═══ SCENE ═══ */
+  .scene { max-width: 1000px; margin: 10px auto; padding: 0 20px; position: relative; }
+
+  .epoch-bar { text-align: center; padding: 14px; margin: 10px 0; border-radius: 10px; background: #12121a; border: 1px solid #1a1a2a; font-size: 1rem; font-weight: 700; color: #333; transition: all 0.5s; }
+  .epoch-bar.active { color: #c96bff; border-color: #c96bff44; background: #14121f; }
+
+  /* Pipeline steps */
+  .pipeline { display: flex; justify-content: center; gap: 6px; margin: 16px 0; }
+  .pip { width: 120px; padding: 14px 8px; border-radius: 12px; border: 1px solid #1a1a2a; background: #12121a; text-align: center; transition: all 0.5s; }
+  .pip.on { border-color: #c96bff; background: #1a1530; transform: scale(1.05); box-shadow: 0 0 20px #c96bff22; }
+  .pip .icon { font-size: 1.6rem; }
+  .pip .lbl { font-size: 0.65rem; color: #444; margin-top: 6px; text-transform: uppercase; letter-spacing: 1.5px; transition: color 0.3s; }
+  .pip.on .lbl { color: #c96bff; }
+  .pip-arrow { display: flex; align-items: center; color: #222; font-size: 1rem; transition: color 0.3s; }
+  .pip-arrow.on { color: #c96bff; }
+
+  /* NFT Gallery */
+  .gallery-label { text-align: center; font-size: 0.75rem; color: #444; text-transform: uppercase; letter-spacing: 2px; margin: 20px 0 10px; }
+  .gallery { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; margin: 0 0 20px; }
+  @media (max-width: 700px) { .gallery { grid-template-columns: repeat(3, 1fr); } }
+
+  .card { background: #12121a; border: 1.5px solid #1a1a2a; border-radius: 12px; overflow: hidden; transition: all 0.6s; opacity: 0; transform: translateY(20px); }
+  .card.show { opacity: 1; transform: translateY(0); }
+  .card.listed { border-color: #ffd93d44; }
+  .card.sold { border-color: #6bffb866; box-shadow: 0 0 15px #6bffb811; }
+  .card.stale { border-color: #ff6b6b33; }
+  .card.premium { border-color: #c96bff66; box-shadow: 0 0 15px #c96bff11; }
+  .card canvas { width: 100%; aspect-ratio: 1; display: block; }
+  .card .meta { padding: 10px; }
+  .card .title { font-size: 0.7rem; color: #999; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .card .price { font-size: 0.8rem; font-weight: 700; color: #6bffb8; margin-top: 3px; }
+  .card .badge { font-size: 0.6rem; margin-top: 4px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+  .card .badge.listed { color: #ffd93d; }
+  .card .badge.sold { color: #6bffb8; }
+  .card .badge.stale { color: #ff6b6b; }
+  .card .badge.premium { color: #c96bff; }
+
+  /* Popularity section */
+  .pop-title { text-align: center; font-size: 0.75rem; color: #444; text-transform: uppercase; letter-spacing: 2px; margin: 20px 0 10px; }
+  .pop-grid { max-width: 700px; margin: 0 auto; }
+  .pop-row { display: flex; align-items: center; gap: 10px; padding: 8px 14px; margin: 5px 0; background: #12121a; border-radius: 10px; border: 1px solid #1a1a2a; transition: border-color 0.5s; }
+  .pop-row.hot { border-color: #6bffb833; }
+  .pop-row.cold { border-color: #ff6b6b22; }
+  .pop-name { font-size: 0.8rem; color: #aaa; width: 140px; flex-shrink: 0; }
+  .pop-fill-bg { flex: 1; height: 18px; background: #1a1a2a; border-radius: 9px; overflow: hidden; }
+  .pop-fill { height: 100%; border-radius: 9px; transition: width 1.2s ease, background 0.5s; }
+  .pop-num { font-size: 0.75rem; color: #666; width: 50px; text-align: right; font-weight: 600; }
+  .pop-stat { font-size: 0.65rem; color: #444; width: 70px; text-align: right; }
+
+  /* Summary card */
+  .sum { background: #12121a; border: 1px solid #1a1a2a; border-radius: 14px; padding: 28px; margin: 30px auto; max-width: 700px; text-align: center; opacity: 0; transition: all 0.8s; transform: translateY(20px); }
+  .sum.show { opacity: 1; transform: translateY(0); }
+  .sum h3 { font-size: 1.1rem; color: #fff; margin-bottom: 16px; }
+  .sum .row { display: flex; justify-content: center; gap: 40px; flex-wrap: wrap; }
+  .sum .val { font-size: 2rem; font-weight: 800; background: linear-gradient(135deg, #c96bff, #6bb5ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .sum .lbl { font-size: 0.65rem; color: #555; text-transform: uppercase; letter-spacing: 1.5px; margin-top: 2px; }
+  .sum .insight { margin-top: 20px; font-size: 0.85rem; color: #777; line-height: 1.6; text-align: left; padding: 16px; background: #0a0a12; border-radius: 10px; }
+  .sum .insight strong { color: #c96bff; }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>The Creative Feedback Loop</h1>
+  <p>Autonomous art, any chain. An AI artist that learns what sells and adapts.</p>
+  <div class="sub">Click play to watch 2 creative epochs with market learning.</div>
+</div>
+
+<div class="controls">
+  <button class="play-btn" id="playBtn" onclick="run()">PLAY ANIMATION</button>
+  <div class="narration" id="narr">&nbsp;</div>
+</div>
+
+<div class="scene">
+  <div class="epoch-bar" id="epoch">—</div>
+
+  <div class="pipeline" id="pipe">
+    <div class="pip" id="p-create"><div class="icon">🎨</div><div class="lbl">Create</div></div>
+    <div class="pip-arrow" id="a1">→</div>
+    <div class="pip" id="p-mint"><div class="icon">⛏️</div><div class="lbl">Mint</div></div>
+    <div class="pip-arrow" id="a2">→</div>
+    <div class="pip" id="p-price"><div class="icon">💰</div><div class="lbl">Price</div></div>
+    <div class="pip-arrow" id="a3">→</div>
+    <div class="pip" id="p-list"><div class="icon">📋</div><div class="lbl">List</div></div>
+    <div class="pip-arrow" id="a4">→</div>
+    <div class="pip" id="p-watch"><div class="icon">👁️</div><div class="lbl">Monitor</div></div>
+    <div class="pip-arrow" id="a5">→</div>
+    <div class="pip" id="p-learn"><div class="icon">🧠</div><div class="lbl">Learn</div></div>
+  </div>
+
+  <div class="gallery-label">Agent's Gallery</div>
+  <div class="gallery" id="gallery"></div>
+
+  <div class="pop-title" id="popTitle">Style Popularity</div>
+  <div class="pop-grid" id="popGrid"></div>
+
+  <div class="sum" id="sum">
+    <h3>Agent Developed Taste</h3>
+    <div class="row">
+      <div><div class="val" id="sv-m">0</div><div class="lbl">Minted</div></div>
+      <div><div class="val" id="sv-s">0</div><div class="lbl">Sold</div></div>
+      <div><div class="val" id="sv-r">0</div><div class="lbl">Revenue ETH</div></div>
+      <div><div class="val" id="sv-e">0</div><div class="lbl">Epochs</div></div>
+    </div>
+    <div class="insight">
+      <strong>Epoch 1:</strong> Minted 1 of each style to test the market. No prior data.<br>
+      <strong>Market response:</strong> 3 sold (Genesis Fragment, Quantum Drift, Neural Bloom). 3 had no buyers.<br>
+      <strong>Learning:</strong> Popularity scores updated. Sold styles → 65+. Unsold → penalized to 38-42.<br>
+      <strong>Curation:</strong> Stale listings repriced -30% to move inventory.<br>
+      <strong>Epoch 2:</strong> Weighted selection toward popular styles. Hot styles get +50% demand premium. Agent created 3× more Genesis Fragments and Quantum Drifts than Void Echoes.
+    </div>
+  </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+const STYLES = [
+  { name: "Genesis Fragment", hue: 280, pop: 50, minted: 0, sold: 0 },
+  { name: "Quantum Drift",   hue: 200, pop: 50, minted: 0, sold: 0 },
+  { name: "Neural Bloom",    hue: 140, pop: 50, minted: 0, sold: 0 },
+  { name: "Void Echo",       hue: 240, pop: 50, minted: 0, sold: 0 },
+  { name: "Prismatic Wave",  hue: 320, pop: 50, minted: 0, sold: 0 },
+  { name: "Entropy Garden",  hue: 60,  pop: 50, minted: 0, sold: 0 },
+];
+
+let cards = [];
+let totalSold = 0, totalRev = 0;
+
+function drawArt(canvas, seed, hue) {
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width = 200, h = canvas.height = 200;
+  const R = s => { s = Math.sin(s)*43758.5453; return s - Math.floor(s); };
+  const h2 = (hue + 90 + R(seed*3)*90) % 360;
+  const bg = ctx.createLinearGradient(0,0,w*R(seed*2),h);
+  bg.addColorStop(0, `hsl(${hue},25%,6%)`); bg.addColorStop(1, `hsl(${h2},20%,10%)`);
+  ctx.fillStyle = bg; ctx.fillRect(0,0,w,h);
+  const style = Math.floor(R(seed*99)*4);
+  if (style===0) {
+    for (let i=0;i<12;i++){const x=R(seed+i*7.1)*w,y=R(seed+i*13.3)*h,r=R(seed+i*3.7)*50+12;
+    const g=ctx.createRadialGradient(x,y,0,x,y,r);const ch=(hue+R(seed+i*5.9)*150)%360;
+    g.addColorStop(0,`hsla(${ch},80%,60%,${0.2+R(seed+i*2.3)*0.3})`);g.addColorStop(1,`hsla(${ch},60%,40%,0)`);
+    ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();}
+  } else if (style===1) {
+    for(let i=0;i<8;i++){const cx=R(seed+i*7)*w,cy=R(seed+i*13)*h,sz=30+R(seed+i*3)*60;
+    const sides=3+Math.floor(R(seed+i*17)*2),rot=R(seed+i*23)*Math.PI;const ch=(hue+R(seed+i*5.9)*120)%360;
+    ctx.save();ctx.translate(cx,cy);ctx.rotate(rot);ctx.beginPath();
+    for(let s=0;s<=sides;s++){const a=(s/sides)*Math.PI*2,px=Math.cos(a)*sz,py=Math.sin(a)*sz;s===0?ctx.moveTo(px,py):ctx.lineTo(px,py);}
+    ctx.closePath();ctx.fillStyle=`hsla(${ch},70%,55%,${0.15+R(seed+i*2)*0.25})`;ctx.fill();
+    ctx.strokeStyle=`hsla(${ch},50%,70%,${0.2+R(seed+i*4)*0.2})`;ctx.lineWidth=1.5;ctx.stroke();ctx.restore();}
+  } else if (style===2) {
+    const cx=w/2+(R(seed*11)-0.5)*60,cy=h/2+(R(seed*13)-0.5)*40;
+    for(let i=10;i>0;i--){const r=i*14+R(seed+i)*10;const ch=(hue+i*28+R(seed+i*7)*30)%360;
+    ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.strokeStyle=`hsla(${ch},70%,60%,${0.12+R(seed+i*3)*0.18})`;
+    ctx.lineWidth=3+R(seed+i*5)*5;ctx.stroke();}
+    const g=ctx.createRadialGradient(cx,cy,0,cx,cy,30);g.addColorStop(0,`hsla(${(hue+180)%360},80%,70%,0.35)`);g.addColorStop(1,'transparent');
+    ctx.fillStyle=g;ctx.beginPath();ctx.arc(cx,cy,30,0,Math.PI*2);ctx.fill();
+  } else {
+    for(let i=0;i<10;i++){ctx.beginPath();ctx.moveTo(R(seed+i*11)*w,R(seed+i*17)*h);
+    ctx.bezierCurveTo(R(seed+i*23)*w,R(seed+i*29)*h,R(seed+i*31)*w,R(seed+i*37)*h,R(seed+i*41)*w,R(seed+i*43)*h);
+    const ch=(hue+R(seed+i*5)*160)%360;ctx.strokeStyle=`hsla(${ch},70%,60%,${0.2+R(seed+i*2)*0.3})`;
+    ctx.lineWidth=2+R(seed+i*7)*6;ctx.lineCap='round';ctx.stroke();}
+  }
+}
+
+function narr(t) { $('narr').textContent = t; $('narr').className = 'narration active'; }
+
+function pip(id) {
+  document.querySelectorAll('.pip').forEach(p => p.classList.remove('on'));
+  document.querySelectorAll('.pip-arrow').forEach(a => a.classList.remove('on'));
+  if (id) { $(id).classList.add('on'); }
+}
+
+function addCard(name, price, hue, seed) {
+  const idx = cards.length;
+  const div = document.createElement('div');
+  div.className = 'card';
+  div.id = `c${idx}`;
+  div.innerHTML = `<canvas id="cv${idx}"></canvas><div class="meta"><div class="title">${name}</div><div class="price">${price} ETH</div><div class="badge listed">Listed</div></div>`;
+  $('gallery').appendChild(div);
+  drawArt(document.getElementById(`cv${idx}`), seed, hue);
+  cards.push({ el: div, name, price: parseFloat(price), hue, status: 'listed' });
+  requestAnimationFrame(() => div.classList.add('show'));
+}
+
+function setCard(idx, status, badgeText, priceText) {
+  const c = cards[idx];
+  c.el.className = `card show ${status}`;
+  c.status = status;
+  const badge = c.el.querySelector('.badge');
+  badge.className = `badge ${status}`;
+  badge.textContent = badgeText;
+  if (priceText) c.el.querySelector('.price').textContent = priceText;
+}
+
+function renderPop() {
+  const grid = $('popGrid');
+  grid.innerHTML = '';
+  const sorted = [...STYLES].sort((a,b) => b.pop - a.pop);
+  sorted.forEach(s => {
+    const cls = s.sold > 0 ? 'hot' : (s.minted > 0 && s.sold === 0 ? 'cold' : '');
+    const row = document.createElement('div');
+    row.className = `pop-row ${cls}`;
+    row.innerHTML = `
+      <div class="pop-name">${s.name}</div>
+      <div class="pop-fill-bg"><div class="pop-fill" style="width:${s.pop}%;background:hsl(${s.hue},55%,50%)"></div></div>
+      <div class="pop-num">${s.pop}</div>
+      <div class="pop-stat">${s.sold}/${s.minted} sold</div>
+    `;
+    grid.appendChild(row);
+  });
+}
+
+async function run() {
+  $('playBtn').disabled = true;
+  $('playBtn').textContent = 'RUNNING...';
+  $('gallery').innerHTML = '';
+  $('sum').classList.remove('show');
+  cards = []; totalSold = 0; totalRev = 0;
+  STYLES.forEach(s => { s.pop = 50; s.minted = 0; s.sold = 0; });
+  renderPop();
+
+  // ══════════ EPOCH 1 ══════════
+  $('epoch').textContent = 'EPOCH 1 — Testing the Market';
+  $('epoch').className = 'epoch-bar active';
+  narr('The agent creates one piece in each style to test market demand.');
+  await sleep(2500);
+
+  for (let i = 0; i < 6; i++) {
+    const s = STYLES[i];
+    const price = (0.001 + i * 0.0001).toFixed(4);
+
+    pip('p-create');
+    narr(`Creating "${s.name} #${i}" — ${['abstract','flowing','organic','geometric','prismatic','botanical'][i]} style`);
+    await sleep(1200);
+
+    pip('p-mint'); $('a1').classList.add('on');
+    narr(`Minting on Base as omnichain NFT...`);
+    await sleep(800);
+
+    pip('p-price'); $('a2').classList.add('on');
+    narr(`Priced at ${price} ETH (base price, no market data yet)`);
+    await sleep(800);
+
+    pip('p-list'); $('a3').classList.add('on');
+    narr(`Listed on Gallery marketplace`);
+    addCard(`${s.name} #${i}`, price, s.hue, i + 42);
+    s.minted++;
+    await sleep(1000);
+  }
+
+  renderPop();
+  pip(null);
+  narr('6 pieces listed. Now watching for sales...');
+  await sleep(2000);
+
+  // ══════════ MARKET ACTIVITY ══════════
+  $('epoch').textContent = 'MARKET — Buyers Arrive';
+  pip('p-watch'); $('a4').classList.add('on');
+  await sleep(1500);
+
+  // Sale 1
+  narr('💸 SALE! "Genesis Fragment #0" — a collector bought it!');
+  setCard(0, 'sold', 'SOLD!');
+  STYLES[0].sold++; totalSold++; totalRev += cards[0].price;
+  renderPop();
+  await sleep(2000);
+
+  // Sale 2
+  narr('💸 SALE! "Quantum Drift #1" — another buyer!');
+  setCard(1, 'sold', 'SOLD!');
+  STYLES[1].sold++; totalSold++; totalRev += cards[1].price;
+  renderPop();
+  await sleep(2000);
+
+  // Sale 3
+  narr('💸 SALE! "Neural Bloom #2" — organic style is popular!');
+  setCard(2, 'sold', 'SOLD!');
+  STYLES[2].sold++; totalSold++; totalRev += cards[2].price;
+  renderPop();
+  await sleep(2000);
+
+  // No sales for the rest
+  narr('No buyers for Void Echo, Prismatic Wave, or Entropy Garden...');
+  setCard(3, 'stale', 'No buyers');
+  await sleep(800);
+  setCard(4, 'stale', 'No buyers');
+  await sleep(800);
+  setCard(5, 'stale', 'No buyers');
+  await sleep(2000);
+
+  // ══════════ LEARNING ══════════
+  $('epoch').textContent = 'LEARNING — Analyzing Sales Data';
+  pip('p-learn'); $('a5').classList.add('on');
+  narr('The agent analyzes what sold and what didn\'t...');
+  await sleep(2500);
+
+  // Update popularity
+  narr('Genesis Fragment, Quantum Drift, Neural Bloom — 100% sell rate → popularity ↑');
+  STYLES[0].pop = 68; STYLES[1].pop = 65; STYLES[2].pop = 62;
+  renderPop();
+  await sleep(2000);
+
+  narr('Void Echo, Prismatic Wave, Entropy Garden — 0% sell rate → popularity ↓');
+  STYLES[3].pop = 42; STYLES[4].pop = 40; STYLES[5].pop = 38;
+  renderPop();
+  await sleep(2500);
+
+  // Curate
+  narr('✂️ Curating: repricing stale listings -30% to move inventory');
+  const staleIdxs = [3, 4, 5];
+  for (const idx of staleIdxs) {
+    const newPrice = (cards[idx].price * 0.7).toFixed(4);
+    setCard(idx, 'stale', `-30% → ${newPrice}`, `${newPrice} ETH`);
+    await sleep(1000);
+  }
+  await sleep(1500);
+
+  // ══════════ EPOCH 2 ══════════
+  $('epoch').textContent = 'EPOCH 2 — Creating What the Market Wants';
+  $('epoch').className = 'epoch-bar active';
+  narr('The agent now favors popular styles and charges demand premiums.');
+  await sleep(2500);
+
+  const epoch2 = [
+    { si: 0, label: "popularity 68 → selected" },
+    { si: 1, label: "popularity 65 → selected" },
+    { si: 0, label: "popularity 68 → selected again" },
+    { si: 2, label: "random exploration (20% chance)" },
+  ];
+
+  for (let i = 0; i < epoch2.length; i++) {
+    const { si, label } = epoch2[i];
+    const s = STYLES[si];
+    const tokenId = cards.length;
+    const premium = s.sold > 0 ? 1.5 : 1.0;
+    const price = (0.001 * premium * (1 + tokenId * 0.03)).toFixed(4);
+
+    pip('p-create');
+    narr(`🎨 "${s.name}" — ${label}`);
+    await sleep(1500);
+
+    pip('p-mint'); $('a1').classList.add('on');
+    narr('Minting on Base...');
+    await sleep(800);
+
+    pip('p-price'); $('a2').classList.add('on');
+    if (premium > 1) {
+      narr(`💰 ${price} ETH — +50% demand premium (hot style, 100% sell rate)`);
+    } else {
+      narr(`💰 ${price} ETH — base price (exploring this style)`);
+    }
+    await sleep(1200);
+
+    pip('p-list'); $('a3').classList.add('on');
+    narr('Listed on Gallery');
+    addCard(`${s.name} #${tokenId}`, price, s.hue, tokenId + 42);
+    if (premium > 1) setCard(tokenId, 'premium', 'Premium');
+    s.minted++;
+    renderPop();
+    await sleep(1200);
+  }
+
+  // ══════════ SUMMARY ══════════
+  pip(null);
+  $('epoch').textContent = 'Complete — The Agent Developed Taste';
+  $('epoch').className = 'epoch-bar';
+  narr('Popular styles got more editions and higher prices. Stale pieces were repriced.');
+
+  $('sv-m').textContent = cards.length;
+  $('sv-s').textContent = totalSold;
+  $('sv-r').textContent = totalRev.toFixed(4);
+  $('sv-e').textContent = '2';
+  $('sum').classList.add('show');
+
+  await sleep(2000);
+  $('playBtn').disabled = false;
+  $('playBtn').textContent = 'REPLAY';
+}
+
+renderPop();
+</script>
+</body>
+</html>

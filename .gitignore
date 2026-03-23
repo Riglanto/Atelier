@@ -1,0 +1,26 @@
+node_modules/
+artifacts/
+cache/
+dist/
+typechain-types/
+coverage/
+coverage.json
+deployments/
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Claude Code
+.claude/
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+*.tsbuildinfo
+
+# Large files
+*.mov
+*.mp4

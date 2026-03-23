@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How It Works — Atelier</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', -apple-system, sans-serif; background: #0a0a0f; color: #e0e0e0; overflow-x: hidden; line-height: 1.6; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: #0a0a0f; }
+  ::-webkit-scrollbar-thumb { background: #2a2a3a; border-radius: 3px; }
+
+  /* Hero */
+  .hero {
+    text-align: center; padding: 60px 20px 30px;
+    background: radial-gradient(ellipse at 50% 0%, rgba(201,107,255,0.08) 0%, transparent 60%);
+  }
+  .hero h1 {
+    font-size: 2.6rem;
+    background: linear-gradient(135deg, #ff6b6b, #ffd93d, #6bffb8, #6bb5ff, #c96bff);
+    background-size: 300%;
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    animation: gradient 5s ease infinite;
+  }
+  .hero p { color: #777; margin-top: 14px; font-size: 1.1rem; max-width: 650px; margin-left: auto; margin-right: auto; }
+  @keyframes gradient { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
+
+  /* Nav back link */
+  .nav { padding: 16px 24px; }
+  .nav a { color: #666; text-decoration: none; font-size: 0.85rem; transition: color 0.2s; }
+  .nav a:hover { color: #c96bff; }
+
+  /* Stats */
+  .stats { display: flex; justify-content: center; gap: 50px; padding: 20px 20px 40px; flex-wrap: wrap; }
+  .stat { text-align: center; }
+  .stat-value { font-size: 2rem; font-weight: 700; color: #fff; }
+  .stat-label { font-size: 0.72rem; color: #555; text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
+
+  /* Gallery Section */
+  .gallery-section {
+    max-width: 1100px; margin: 0 auto 50px; padding: 0 20px;
+  }
+  .gallery-section h2 {
+    font-size: 1.4rem; color: #fff; text-align: center; margin-bottom: 20px;
+  }
+  .gallery-section h2 span {
+    background: linear-gradient(90deg, #ff6b6b, #c96bff);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .nft-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; }
+  .nft-card {
+    background: #12121a; border: 1px solid #1e1e2e; border-radius: 14px; overflow: hidden;
+    transition: transform 0.25s, border-color 0.3s, box-shadow 0.3s; cursor: pointer;
+  }
+  .nft-card:hover {
+    transform: translateY(-5px); border-color: #444;
+    box-shadow: 0 8px 30px rgba(201,107,255,0.1);
+  }
+  .nft-art { width: 100%; aspect-ratio: 1; }
+  .nft-art canvas { width: 100%; height: 100%; display: block; }
+  .nft-info { padding: 12px; }
+  .nft-title { font-size: 0.82rem; color: #fff; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .nft-row { display: flex; justify-content: space-between; align-items: center; margin-top: 6px; }
+  .nft-price { color: #6bffb8; font-weight: 700; font-size: 0.82rem; }
+  .nft-chain { font-size: 0.65rem; color: #666; background: #1a1a2e; padding: 2px 7px; border-radius: 4px; }
+  .nft-badge { font-size: 0.65rem; margin-top: 5px; display: inline-block; padding: 1px 6px; border-radius: 3px; }
+  .nft-badge.listed { color: #ffd93d; background: rgba(255,217,61,0.1); }
+  .nft-badge.sold { color: #ff6b6b; background: rgba(255,107,107,0.1); }
+  .nft-badge.bridged { color: #6bb5ff; background: rgba(107,181,255,0.1); }
+  .nft-badge.minting { color: #c96bff; background: rgba(201,107,255,0.1); }
+
+  /* Section */
+  .section { max-width: 900px; margin: 0 auto; padding: 0 20px; }
+  .section-title {
+    font-size: 1.5rem; color: #fff; text-align: center; margin-bottom: 28px;
+    position: relative;
+  }
+  .section-title::after {
+    content: ''; display: block; width: 50px; height: 2px; margin: 10px auto 0;
+    background: linear-gradient(90deg, #ff6b6b, #c96bff);
+    border-radius: 1px;
+  }
+
+  /* Flow Tabs */
+  .flow-tabs { display: flex; gap: 8px; justify-content: center; margin-bottom: 28px; flex-wrap: wrap; }
+  .flow-tab {
+    padding: 10px 22px; border-radius: 10px; border: 1px solid #1e1e2e; background: #12121a;
+    color: #666; cursor: pointer; font-size: 0.85rem; transition: all 0.25s; user-select: none;
+  }
+  .flow-tab:hover { border-color: #444; color: #ccc; }
+  .flow-tab.active {
+    background: linear-gradient(135deg, rgba(201,107,255,0.15), rgba(107,181,255,0.1));
+    border-color: #c96bff; color: #fff;
+  }
+  .flow-panel { display: none; animation: fadeSlide 0.4s ease; }
+  .flow-panel.active { display: block; }
+  @keyframes fadeSlide { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* Flow Steps */
+  .flow-step {
+    display: flex; gap: 18px; align-items: flex-start; padding: 18px 20px; margin: 0;
+    background: #12121a; border: 1px solid #1a1a28; border-radius: 12px;
+    transition: border-color 0.3s, transform 0.2s;
+  }
+  .flow-step:hover { border-color: #2a2a4a; transform: translateX(4px); }
+  .flow-step .num {
+    min-width: 36px; height: 36px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 0.95rem; flex-shrink: 0;
+  }
+  .flow-step .num.mint-num { background: rgba(255,107,107,0.15); color: #ff6b6b; }
+  .flow-step .num.buy-num { background: rgba(107,255,184,0.15); color: #6bffb8; }
+  .flow-step .num.bridge-num { background: rgba(201,107,255,0.15); color: #c96bff; }
+  .flow-step .num.direct-num { background: rgba(107,181,255,0.15); color: #6bb5ff; }
+  .flow-step h3 { font-size: 0.95rem; color: #fff; margin-bottom: 4px; }
+  .flow-step p { font-size: 0.82rem; color: #777; line-height: 1.5; }
+  .flow-step code {
+    background: #1a1a2e; padding: 2px 7px; border-radius: 5px;
+    font-size: 0.73rem; color: #c96bff; font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  }
+  .connector {
+    text-align: center; color: #2a2a3a; font-size: 1rem; padding: 4px 0; user-select: none;
+  }
+  .connector .arrow { display: inline-block; width: 2px; height: 18px; background: linear-gradient(to bottom, #2a2a3a, #1a1a28); position: relative; }
+  .connector .arrow::after { content: ''; position: absolute; bottom: -3px; left: -3px; border-left: 4px solid transparent; border-right: 4px solid transparent; border-top: 5px solid #2a2a3a; }
+
+  /* Architecture */
+  .arch-section { max-width: 900px; margin: 60px auto; padding: 0 20px; }
+
+  .contract-card {
+    background: #12121a; border: 1px solid #1e1e2e; border-radius: 14px; padding: 24px;
+    margin: 16px 0; cursor: pointer; transition: all 0.3s;
+  }
+  .contract-card:hover { border-color: #333; }
+  .contract-card.open { border-color: #c96bff; box-shadow: 0 4px 20px rgba(201,107,255,0.08); }
+  .contract-header { display: flex; align-items: center; gap: 14px; }
+  .contract-icon {
+    width: 42px; height: 42px; border-radius: 10px; display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem; flex-shrink: 0;
+  }
+  .contract-icon.nft-icon { background: rgba(255,107,107,0.12); color: #ff6b6b; }
+  .contract-icon.gallery-icon { background: rgba(107,255,184,0.12); color: #6bffb8; }
+  .contract-icon.mock-icon { background: rgba(107,181,255,0.12); color: #6bb5ff; }
+  .contract-card h3 { font-size: 1rem; color: #fff; }
+  .contract-card .subtitle { font-size: 0.78rem; color: #666; margin-top: 2px; }
+  .contract-tags { margin-top: 6px; display: flex; gap: 5px; flex-wrap: wrap; }
+  .contract-tags .tag { font-size: 0.62rem; background: #1a1a2e; padding: 2px 8px; border-radius: 4px; color: #888; }
+  .contract-detail { display: none; margin-top: 18px; padding-top: 16px; border-top: 1px solid #1a1a28; }
+  .contract-card.open .contract-detail { display: block; animation: fadeSlide 0.3s ease; }
+  .fn-item { padding: 8px 0; border-bottom: 1px solid #0f0f18; }
+  .fn-item:last-child { border-bottom: none; }
+  .fn-sig {
+    font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: 0.75rem; color: #c96bff;
+    word-break: break-all;
+  }
+  .fn-desc { font-size: 0.78rem; color: #555; margin-top: 3px; padding-left: 12px; }
+
+  /* Chain row */
+  .chain-row { display: flex; gap: 20px; margin-top: 20px; flex-wrap: wrap; }
+  .chain-box {
+    flex: 1; min-width: 260px; background: #12121a; border: 1px solid #1e1e2e; border-radius: 14px; padding: 20px;
+  }
+  .chain-box h4 { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 12px; }
+  .chain-box.base h4 { color: #ff6b6b; }
+  .chain-box.dest h4 { color: #6bb5ff; }
+  .chain-box ul { list-style: none; }
+  .chain-box li { font-size: 0.82rem; color: #888; padding: 4px 0; padding-left: 14px; position: relative; }
+  .chain-box li::before { content: ''; position: absolute; left: 0; top: 50%; width: 6px; height: 6px; border-radius: 50%; transform: translateY(-50%); }
+  .chain-box.base li::before { background: #ff6b6b; opacity: 0.4; }
+  .chain-box.dest li::before { background: #6bb5ff; opacity: 0.4; }
+
+  /* Bridge visual */
+  .bridge-visual {
+    text-align: center; padding: 30px 0;
+  }
+  .bridge-visual svg { max-width: 100%; }
+
+  /* Footer */
+  .footer {
+    text-align: center; padding: 50px 20px 30px; color: #333; font-size: 0.8rem;
+  }
+  .footer a { color: #555; text-decoration: none; }
+  .footer a:hover { color: #c96bff; }
+
+  @media (max-width: 768px) {
+    .hero h1 { font-size: 1.7rem; }
+    .nft-grid { grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); }
+    .chain-row { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <a href="architecture.html">Architecture</a>
+</div>
+
+<div class="hero">
+  <h1>How It Works</h1>
+  <p>An AI agent mints generative art as cross-chain NFTs. Collectors buy on any chain and receive on any chain — in a single transaction.</p>
+</div>
+
+<div class="stats">
+  <div class="stat"><div class="stat-value">9</div><div class="stat-label">Tests Passing</div></div>
+  <div class="stat"><div class="stat-value">3</div><div class="stat-label">Contracts</div></div>
+  <div class="stat"><div class="stat-value">150+</div><div class="stat-label">Supported Chains</div></div>
+  <div class="stat"><div class="stat-value">1 tx</div><div class="stat-label">Buy + Bridge</div></div>
+</div>
+
+<!-- Animated NFT Gallery -->
+<div class="gallery-section">
+  <h2><span>Agent's Gallery</span> — Live Simulation</h2>
+  <div class="nft-grid" id="nft-grid"></div>
+</div>
+
+<!-- Bridge Animation -->
+<div class="bridge-visual">
+  <svg width="700" height="80" viewBox="0 0 700 80">
+    <defs>
+      <linearGradient id="bgrad" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stop-color="#ff6b6b" stop-opacity="0.7"/>
+        <stop offset="50%" stop-color="#c96bff" stop-opacity="0.9"/>
+        <stop offset="100%" stop-color="#6bb5ff" stop-opacity="0.7"/>
+      </linearGradient>
+    </defs>
+    <rect x="20" y="25" width="100" height="34" rx="8" fill="#12121a" stroke="#ff6b6b" stroke-width="1.2"/>
+    <text x="70" y="47" text-anchor="middle" fill="#ff6b6b" font-family="sans-serif" font-size="12" font-weight="700">BASE</text>
+    <rect x="580" y="25" width="100" height="34" rx="8" fill="#12121a" stroke="#6bb5ff" stroke-width="1.2"/>
+    <text x="630" y="47" text-anchor="middle" fill="#6bb5ff" font-family="sans-serif" font-size="12" font-weight="700">ARBITRUM</text>
+    <line x1="125" y1="42" x2="575" y2="42" stroke="url(#bgrad)" stroke-width="1.5" stroke-dasharray="8 4">
+      <animate attributeName="stroke-dashoffset" from="0" to="-24" dur="1.5s" repeatCount="indefinite"/>
+    </line>
+    <rect x="0" y="0" width="16" height="16" rx="3" fill="url(#bgrad)" stroke="#fff" stroke-width="0.5" opacity="0.9">
+      <animateTransform attributeName="transform" type="translate" values="130,34;560,34;130,34" dur="4s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="1;0.7;1;0.7;1" dur="4s" repeatCount="indefinite"/>
+    </rect>
+    <text x="350" y="72" text-anchor="middle" fill="#444" font-family="sans-serif" font-size="9">LayerZero V2 — burn on source, mint on destination</text>
+  </svg>
+</div>
+
+<!-- Transaction Flows -->
+<div class="section" style="margin-top: 30px;">
+  <div class="section-title">Transaction Flows</div>
+
+  <div class="flow-tabs">
+    <div class="flow-tab active" data-flow="mint">Mint</div>
+    <div class="flow-tab" data-flow="buy">Buy</div>
+    <div class="flow-tab" data-flow="bridge">Buy + Bridge</div>
+    <div class="flow-tab" data-flow="direct">Direct Bridge</div>
+  </div>
+
+  <!-- MINT -->
+  <div class="flow-panel active" id="flow-mint">
+    <div class="flow-step"><div class="num mint-num">1</div><div><h3>Agent creates art</h3><p>AI generates a unique image and metadata JSON, uploads to IPFS, obtains a content-addressed URI.</p></div></div>
+    <div class="connector"><div class="arrow"></div></div>
+    <div class="flow-step"><div class="num mint-num">2</div><div><h3>Mint on-chain</h3><p>Agent calls <code>nft.mint(agentAddr, "ipfs://Qm...")</code> on Base. Token ID auto-increments. Artist attribution recorded.</p></div></div>
+    <div class="connector"><div class="arrow"></div></div>
+    <div class="flow-step"><div class="num mint-num">3</div><div><h3>Approve + List</h3><p>Agent approves Gallery contract, then calls <code>gallery.listForSale(tokenId, price)</code>. NFT appears in the marketplace.</p></div></div>
+  </div>
+
+  <!-- BUY -->
+  <div class="flow-panel" id="flow-buy">
+    <div class="flow-step"><div class="num buy-num">1</div><div><h3>Browse Gallery</h3><p>Buyer discovers NFTs listed on Base. Sees price, artist, metadata, and chain information.</p></div></div>
+    <div class="connector"><div class="arrow"></div></div>
+    <div class="flow-step"><div class="num buy-num">2</div><div><h3>Purchase</h3><p>Buyer calls <code>gallery.buy{value: price}(tokenId)</code>. Must send at least the listing price.</p></div></div>
+    <div class="connector"><div class="arrow"></div></div>
+    <div class="flow-step"><div class="num buy-num">3</div><div><h3>Transfer + Payment</h3><p>Gallery transfers NFT from seller to buyer via <code>transferFrom</code>. ETH sent to seller. Any excess refunded to buyer.</p></div></div>
+  </div>
+
+  <!-- BUY + BRIDGE -->
+  <div class="flow-panel" id="flow-bridge">
+    <div class="flow-step"><div class="num bridge-num">1</div><div><h3>Buyer on another chain wants an NFT on Base</h3><p>Calls <code>gallery.buyAndBridge{value: price + lzFee}(tokenId, dstEid, options)</code>. Single transaction.</p></div></div>
+    <div class="connector"><div class="arrow"></div></div>
+    <div class="flow-step"><div class="num bridge-num">2</div><div><h3>Gallery buys from seller</h3><p>NFT transfers from seller to Gallery contract. Seller receives the listing price in ETH.</p></div></div>
+    <div class="connector"><div class="arrow"></div></div>
+    <div class="flow-step"><div class="num bridge-num">3</div><div><h3>Gallery initiates cross-chain transfer</h3><p>Gallery calls <code>nft.sendNFTTo(tokenId, buyer, dstEid)</code>. NFT is burned on Base.</p></div></div>
+    <div class="connector"><div class="arrow"></div></div>
+    <div class="flow-step"><div class="num bridge-num">4</div><div><h3>LayerZero delivers to destination</h3><p>DVNs verify the message. Executor calls <code>_lzReceive()</code> on the destination chain. NFT minted to buyer with same tokenId + URI. Takes ~30 seconds.</p></div></div>
+  </div>
+
+  <!-- DIRECT BRIDGE -->
+  <div class="flow-panel" id="flow-direct">
+    <div class="flow-step"><div class="num direct-num">1</div><div><h3>Owner decides to move NFT</h3><p>Estimates fee: <code>nft.quoteSend(tokenId, dstEid, options)</code>. Returns <code>MessagingFee(nativeFee, lzTokenFee)</code>.</p></div></div>
+    <div class="connector"><div class="arrow"></div></div>
+    <div class="flow-step"><div class="num direct-num">2</div><div><h3>Send cross-chain</h3><p>Calls <code>nft.sendNFT{value: fee}(tokenId, dstEid, options)</code>. NFT is burned on the source chain.</p></div></div>
+    <div class="connector"><div class="arrow"></div></div>
+    <div class="flow-step"><div class="num direct-num">3</div><div><h3>Receive on destination</h3><p><code>_lzReceive()</code> decodes payload, mints same tokenId + URI to the owner on the destination chain. NFT now lives on the new chain.</p></div></div>
+  </div>
+</div>
+
+<!-- Contract Architecture -->
+<div class="arch-section">
+  <div class="section-title">Contract Architecture</div>
+
+  <div class="contract-card" id="cc-nft">
+    <div class="contract-header">
+      <div class="contract-icon nft-icon">&#9670;</div>
+      <div>
+        <h3>AgentONFT721.sol</h3>
+        <div class="subtitle">Omnichain NFT — ERC-721 + LayerZero OApp</div>
+        <div class="contract-tags">
+          <span class="tag">OApp</span><span class="tag">ERC-721</span><span class="tag">LayerZero V2</span><span class="tag">Ownable</span>
+        </div>
+      </div>
+    </div>
+    <div class="contract-detail">
+      <div class="fn-item"><div class="fn-sig">mint(address to, string calldata uri) external onlyOwner returns (uint256)</div><div class="fn-desc">Mints new NFT with auto-incrementing tokenId. Records artist attribution.</div></div>
+      <div class="fn-item"><div class="fn-sig">sendNFT(uint256 tokenId, uint32 dstEid, bytes calldata options) external payable</div><div class="fn-desc">Burns NFT on source chain, sends cross-chain message. Mints on destination to msg.sender.</div></div>
+      <div class="fn-item"><div class="fn-sig">sendNFTTo(uint256 tokenId, address to, uint32 dstEid, bytes calldata options) external payable</div><div class="fn-desc">Same as sendNFT but sends to arbitrary address on destination. Used by Gallery for buyAndBridge.</div></div>
+      <div class="fn-item"><div class="fn-sig">quoteSend(uint256 tokenId, uint32 dstEid, bytes calldata options) external view returns (MessagingFee)</div><div class="fn-desc">Estimates LayerZero messaging fee for a cross-chain transfer.</div></div>
+      <div class="fn-item"><div class="fn-sig">_lzReceive(Origin, bytes32, bytes calldata message, ...) internal override</div><div class="fn-desc">Decodes (tokenId, to, uri) from message, mints NFT to recipient on destination chain.</div></div>
+    </div>
+  </div>
+
+  <div class="contract-card" id="cc-gallery">
+    <div class="contract-header">
+      <div class="contract-icon gallery-icon">&#9733;</div>
+      <div>
+        <h3>Gallery.sol</h3>
+        <div class="subtitle">Cross-Chain Marketplace</div>
+        <div class="contract-tags">
+          <span class="tag">Marketplace</span><span class="tag">Atomic Buy+Bridge</span><span class="tag">ReentrancyGuard</span>
+        </div>
+      </div>
+    </div>
+    <div class="contract-detail">
+      <div class="fn-item"><div class="fn-sig">listForSale(uint256 tokenId, uint256 price) external</div><div class="fn-desc">Lists NFT for sale. Only the token owner can list. Stores Listing{seller, price}.</div></div>
+      <div class="fn-item"><div class="fn-sig">buy(uint256 tokenId) external payable</div><div class="fn-desc">Purchases NFT on the same chain. Transfers NFT to buyer, pays seller, refunds excess ETH.</div></div>
+      <div class="fn-item"><div class="fn-sig">buyAndBridge(uint256 tokenId, uint32 dstEid, bytes calldata options) external payable</div><div class="fn-desc">Atomic: buys from seller + initiates cross-chain transfer to buyer on destination. One transaction.</div></div>
+      <div class="fn-item"><div class="fn-sig">cancelListing(uint256 tokenId) external</div><div class="fn-desc">Removes listing. Only the original seller can cancel.</div></div>
+    </div>
+  </div>
+
+  <div class="contract-card" id="cc-mock">
+    <div class="contract-header">
+      <div class="contract-icon mock-icon">&#9881;</div>
+      <div>
+        <h3>SendLibMock.sol</h3>
+        <div class="subtitle">Mock LayerZero Message Library</div>
+        <div class="contract-tags">
+          <span class="tag">Testing</span><span class="tag">ISendLib</span>
+        </div>
+      </div>
+    </div>
+    <div class="contract-detail">
+      <div class="fn-item"><div class="fn-sig">send(...) external returns (MessagingFee, bytes)</div><div class="fn-desc">Returns zero fees. Enables EndpointV2Mock to process send calls locally.</div></div>
+      <div class="fn-item"><div class="fn-sig">supportsInterface(bytes4) external pure returns (bool)</div><div class="fn-desc">Supports ISendLib and IMessageLib interfaces for endpoint registration.</div></div>
+    </div>
+  </div>
+
+  <!-- Chain deployment overview -->
+  <div class="chain-row">
+    <div class="chain-box base">
+      <h4>Base (Minting Chain)</h4>
+      <ul>
+        <li>AgentONFT721 — mints new art</li>
+        <li>Gallery — marketplace + buyAndBridge</li>
+        <li>Primary chain for agent activity</li>
+      </ul>
+    </div>
+    <div class="chain-box dest">
+      <h4>Arbitrum / Optimism (Destination)</h4>
+      <ul>
+        <li>AgentONFT721 (peer) — receives bridged NFTs</li>
+        <li>Can bridge back to any peered chain</li>
+        <li>Same tokenId + URI preserved</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  <p>Atelier &mdash; Built for <a href="#">The Synthesis</a> hackathon</p>
+  <p style="margin-top: 6px;"><a href="architecture.html">Architecture</a></p>
+</div>
+
+<script>
+// --- Generative Art Engine — Cosmic Entities (NASA-inspired) ---
+// (shared with architecture.html)
+function generateArt(canvas, seed) {
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width = 300;
+  const h = canvas.height = 300;
+  const R = (s) => { s = Math.sin(s) * 43758.5453; return s - Math.floor(s); };
+  const TAU = Math.PI * 2;
+  // Deep space bg
+  const bgGrad = ctx.createRadialGradient(w/2,h/2,0,w/2,h/2,w*0.8);
+  bgGrad.addColorStop(0, `hsl(${220+R(seed*3)*40},30%,${4+R(seed*5)*4}%)`); bgGrad.addColorStop(1,'#020208');
+  ctx.fillStyle = bgGrad; ctx.fillRect(0,0,w,h);
+  for(let i=0;i<80;i++){const sx=R(seed+i*1.1)*w,sy=R(seed+i*2.3)*h,b=R(seed+i*3.7);ctx.beginPath();ctx.arc(sx,sy,b*1.5,0,TAU);ctx.fillStyle=`rgba(255,255,${200+b*55},${0.3+b*0.7})`;ctx.fill();}
+  const style=Math.floor(R(seed*99)*6);
+  if(style===0){const cx=w*0.5+(R(seed*7)-0.5)*40,cy=h*0.5+(R(seed*9)-0.5)*30,pr=60+R(seed*11)*35;const atmo=ctx.createRadialGradient(cx-pr*0.3,cy,pr*0.8,cx,cy,pr*1.4);atmo.addColorStop(0,'transparent');atmo.addColorStop(0.7,`hsla(${200+R(seed*13)*60},80%,50%,0.15)`);atmo.addColorStop(1,'transparent');ctx.fillStyle=atmo;ctx.fillRect(0,0,w,h);const hue1=180+R(seed*15)*80;const pGrad=ctx.createRadialGradient(cx-pr*0.3,cy-pr*0.2,pr*0.1,cx,cy,pr);pGrad.addColorStop(0,`hsl(${hue1},50%,45%)`);pGrad.addColorStop(0.5,`hsl(${hue1+20},40%,30%)`);pGrad.addColorStop(1,`hsl(${hue1+40},30%,8%)`);ctx.beginPath();ctx.arc(cx,cy,pr,0,TAU);ctx.fillStyle=pGrad;ctx.fill();for(let i=0;i<5;i++){const by=cy-pr+pr*2*(i+R(seed+i*17)*0.5)/5;ctx.beginPath();ctx.ellipse(cx,by,pr*0.95,3+R(seed+i*19)*5,(R(seed+i*21)-0.5)*0.2,0,Math.PI);ctx.strokeStyle=`hsla(${hue1+i*15},40%,${35+R(seed+i*23)*20}%,0.3)`;ctx.lineWidth=2+R(seed+i*25)*3;ctx.stroke();}ctx.beginPath();ctx.ellipse(cx+pr*0.15,cy,pr*0.2,pr,0,0,TAU);ctx.fillStyle='rgba(0,0,0,0.25)';ctx.fill();const starX=w*0.15+R(seed*27)*w*0.15,starY=h*0.2+R(seed*29)*h*0.15;const sG=ctx.createRadialGradient(starX,starY,0,starX,starY,30);sG.addColorStop(0,'#fff8e0');sG.addColorStop(0.3,`hsla(${30+R(seed*31)*30},90%,70%,0.6)`);sG.addColorStop(1,'transparent');ctx.fillStyle=sG;ctx.fillRect(0,0,w,h);
+  }else if(style===1){const cx=w*0.5+(R(seed*7)-0.5)*30,cy=h*0.55+(R(seed*9)-0.5)*20,pr=55+R(seed*11)*30;const mG=ctx.createRadialGradient(cx-pr*0.25,cy-pr*0.2,pr*0.1,cx,cy,pr);mG.addColorStop(0,'#e8f0ff');mG.addColorStop(0.4,'#a8c8e8');mG.addColorStop(0.8,'#4a6a8a');mG.addColorStop(1,'#1a2a3a');ctx.beginPath();ctx.arc(cx,cy,pr,0,TAU);ctx.fillStyle=mG;ctx.fill();for(let i=0;i<12;i++){ctx.beginPath();let px=cx+(R(seed+i*33)-0.5)*pr*1.5,py=cy+(R(seed+i*37)-0.5)*pr*1.5;ctx.moveTo(px,py);for(let s=0;s<5;s++){px+=(R(seed+i*41+s*7)-0.5)*30;py+=(R(seed+i*43+s*11)-0.5)*25;ctx.lineTo(px,py);}ctx.strokeStyle=`hsla(${200+R(seed+i*47)*40},50%,${50+R(seed+i*49)*20}%,0.4)`;ctx.lineWidth=0.5+R(seed+i*51)*1.5;ctx.stroke();}ctx.globalCompositeOperation='destination-in';ctx.beginPath();ctx.arc(cx,cy,pr,0,TAU);ctx.fill();ctx.globalCompositeOperation='source-over';for(let i=0;i<3;i++){const a=-Math.PI/2+(R(seed+i*53)-0.5)*1.2;const px=cx+Math.cos(a)*pr*0.9,py=cy+Math.sin(a)*pr*0.9;for(let j=0;j<15;j++){const d=R(seed+i*57+j*3)*50+10,sp=(R(seed+i*59+j*7)-0.5)*30;ctx.beginPath();ctx.arc(px+Math.cos(a)*d+sp,py+Math.sin(a)*d+sp*0.3,1+R(seed+i*61+j)*3,0,TAU);ctx.fillStyle=`rgba(200,220,255,${0.15+R(seed+i*63+j)*0.25})`;ctx.fill();}}const gjX=w*0.82,gjY=h*0.2,gjR=40+R(seed*65)*20;const gjG=ctx.createRadialGradient(gjX,gjY,0,gjX,gjY,gjR);gjG.addColorStop(0,`hsl(${25+R(seed*67)*20},60%,50%)`);gjG.addColorStop(1,`hsl(${30+R(seed*69)*15},40%,20%)`);ctx.beginPath();ctx.arc(gjX,gjY,gjR,0,TAU);ctx.fillStyle=gjG;ctx.fill();
+  }else if(style===2){const cx=w*0.5,cy=h*0.5;for(let i=60;i>15;i--){const r=i*1.8,hue=30+i*2+R(seed+i)*30;ctx.beginPath();ctx.ellipse(cx,cy,r,r*0.3,(R(seed*71)-0.5)*0.3,0,TAU);ctx.strokeStyle=`hsla(${hue},80%,${40+R(seed+i*73)*30}%,${0.08+R(seed+i*75)*0.12})`;ctx.lineWidth=2+R(seed+i*77)*3;ctx.stroke();}ctx.beginPath();ctx.arc(cx,cy,35,0,TAU);ctx.strokeStyle='hsla(40,90%,70%,0.5)';ctx.lineWidth=3;ctx.stroke();const bhG=ctx.createRadialGradient(cx,cy,0,cx,cy,28);bhG.addColorStop(0,'#000');bhG.addColorStop(0.8,'#000');bhG.addColorStop(1,'rgba(0,0,0,0)');ctx.beginPath();ctx.arc(cx,cy,28,0,TAU);ctx.fillStyle=bhG;ctx.fill();if(R(seed*79)>0.4){for(let d=-1;d<=1;d+=2){ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+(R(seed*81)-0.5)*20,cy+d*h*0.5);ctx.strokeStyle='hsla(220,80%,70%,0.2)';ctx.lineWidth=4;ctx.stroke();}}
+  }else if(style===3){for(let l=0;l<4;l++){const hue=260+l*30+R(seed+l*83)*40;for(let i=0;i<30;i++){const nx=R(seed+l*87+i*3)*w,ny=R(seed+l*89+i*7)*h,nr=20+R(seed+l*91+i*11)*60;const nG=ctx.createRadialGradient(nx,ny,0,nx,ny,nr);nG.addColorStop(0,`hsla(${hue+R(seed+i*93)*30},70%,40%,${0.06+R(seed+i*95)*0.08})`);nG.addColorStop(1,'transparent');ctx.fillStyle=nG;ctx.fillRect(nx-nr,ny-nr,nr*2,nr*2);}}for(let p=0;p<3;p++){const px=w*(0.2+p*0.3)+(R(seed+p*97)-0.5)*40,pw=20+R(seed+p*99)*25;ctx.beginPath();ctx.moveTo(px-pw,h);ctx.quadraticCurveTo(px-pw*0.5,h*0.4,px+(R(seed+p*101)-0.5)*20,h*0.15+R(seed+p*103)*h*0.2);ctx.quadraticCurveTo(px+pw*0.5,h*0.4,px+pw,h);ctx.fillStyle=`hsla(${240+R(seed+p*105)*40},40%,${10+R(seed+p*107)*10}%,0.7)`;ctx.fill();}for(let i=0;i<5;i++){const sx=R(seed+i*109)*w,sy=R(seed+i*111)*h*0.5;const sG=ctx.createRadialGradient(sx,sy,0,sx,sy,8+R(seed+i*113)*10);sG.addColorStop(0,'#fff');sG.addColorStop(0.3,`hsla(${200+R(seed+i*115)*60},80%,80%,0.6)`);sG.addColorStop(1,'transparent');ctx.fillStyle=sG;ctx.beginPath();ctx.arc(sx,sy,15,0,TAU);ctx.fill();}
+  }else if(style===4){const cx=w*0.5+(R(seed*7)-0.5)*20,cy=h*0.52,pr=65+R(seed*11)*25;const pG=ctx.createLinearGradient(cx,cy-pr,cx,cy+pr);const bH=25+R(seed*13)*30;for(let i=0;i<=8;i++)pG.addColorStop(i/8,`hsl(${bH+R(seed+i*117)*30},${40+R(seed+i*119)*30}%,${25+R(seed+i*121)*25}%)`);ctx.beginPath();ctx.arc(cx,cy,pr,0,TAU);ctx.fillStyle=pG;ctx.fill();const sx=cx+(R(seed*123)-0.5)*pr*0.8,sy=cy+(R(seed*125)-0.5)*pr*0.5;ctx.beginPath();ctx.ellipse(sx,sy,pr*0.15,pr*0.1,R(seed*127)*0.5,0,TAU);ctx.fillStyle=`hsla(${bH+40},60%,55%,0.6)`;ctx.fill();ctx.save();ctx.translate(cx,cy);ctx.scale(1,0.3);ctx.rotate((R(seed*129)-0.5)*0.2);for(let r=pr*1.3;r<pr*2.2;r+=3+R(seed+r)*4){ctx.beginPath();ctx.arc(0,0,r,0,TAU);ctx.strokeStyle=`hsla(${40+R(seed+r*1.7)*20},30%,${50+R(seed+r*1.9)*25}%,${0.15+R(seed+r*1.3)*0.25})`;ctx.lineWidth=1.5+R(seed+r*2.1)*2;ctx.stroke();}ctx.restore();
+  }else{const cx=w*0.5+(R(seed*7)-0.5)*30,cy=h*0.5+(R(seed*9)-0.5)*20,pr=60+R(seed*11)*30;const oG=ctx.createRadialGradient(cx-pr*0.3,cy-pr*0.2,pr*0.1,cx,cy,pr);oG.addColorStop(0,'#4a90d9');oG.addColorStop(0.6,'#2a5a9a');oG.addColorStop(1,'#0a1a3a');ctx.beginPath();ctx.arc(cx,cy,pr,0,TAU);ctx.fillStyle=oG;ctx.fill();for(let c=0;c<4;c++){ctx.beginPath();const ca=R(seed+c*131)*TAU,cd=pr*(0.3+R(seed+c*133)*0.4);const ccx=cx+Math.cos(ca)*cd,ccy=cy+Math.sin(ca)*cd;for(let p=0;p<8;p++){const a=(p/8)*TAU,r=10+R(seed+c*137+p*3)*25;const px=ccx+Math.cos(a)*r,py=ccy+Math.sin(a)*r;p===0?ctx.moveTo(px,py):ctx.quadraticCurveTo(ccx+Math.cos(a-0.3)*r*1.2,ccy+Math.sin(a-0.3)*r*1.2,px,py);}ctx.closePath();ctx.fillStyle=`hsla(${100+R(seed+c*139)*40},${40+R(seed+c*141)*20}%,${25+R(seed+c*143)*15}%,0.7)`;ctx.fill();}ctx.globalCompositeOperation='destination-in';ctx.beginPath();ctx.arc(cx,cy,pr,0,TAU);ctx.fill();ctx.globalCompositeOperation='source-over';ctx.beginPath();ctx.arc(cx,cy,pr+2,0,TAU);ctx.strokeStyle='hsla(200,60%,70%,0.3)';ctx.lineWidth=4;ctx.stroke();for(let i=0;i<6;i++){const ca=R(seed+i*145)*TAU;ctx.beginPath();ctx.ellipse(cx+Math.cos(ca)*pr*0.5,cy+Math.sin(ca)*pr*0.3,pr*0.3,pr*0.06,ca,0,Math.PI);ctx.fillStyle=`rgba(255,255,255,${0.08+R(seed+i*147)*0.1})`;ctx.fill();}}
+}
+
+// NFT data
+const nfts = [
+  { id: 0, title: "Genesis Fragment #0",    price: "0.15 ETH", chain: "Base",     badge: "listed",  badgeText: "Listed" },
+  { id: 1, title: "Quantum Drift #1",      price: "0.22 ETH", chain: "Base",     badge: "listed",  badgeText: "Listed" },
+  { id: 2, title: "Neural Bloom #2",       price: "0.31 ETH", chain: "Arbitrum", badge: "bridged", badgeText: "Bridged" },
+  { id: 3, title: "Void Echo #3",          price: "0.08 ETH", chain: "Base",     badge: "sold",    badgeText: "Sold" },
+  { id: 4, title: "Prismatic Wave #4",     price: "0.18 ETH", chain: "Base",    badge: "listed",  badgeText: "Listed" },
+  { id: 5, title: "Entropy Garden #5",     price: "0.45 ETH", chain: "Optimism", badge: "minting", badgeText: "Minting..." },
+];
+
+const grid = document.getElementById('nft-grid');
+nfts.forEach(nft => {
+  const card = document.createElement('div');
+  card.className = 'nft-card';
+  card.innerHTML = `
+    <div class="nft-art"><canvas id="art-${nft.id}"></canvas></div>
+    <div class="nft-info">
+      <div class="nft-title">${nft.title}</div>
+      <div class="nft-row">
+        <span class="nft-price">${nft.price}</span>
+        <span class="nft-chain">${nft.chain}</span>
+      </div>
+      <div class="nft-badge ${nft.badge}">${nft.badgeText}</div>
+    </div>
+  `;
+  grid.appendChild(card);
+  setTimeout(() => generateArt(document.getElementById(`art-${nft.id}`), nft.id + 42), 0);
+});
+
+// --- Flow Tab Switching ---
+document.querySelectorAll('.flow-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.flow-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.flow-panel').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('flow-' + tab.dataset.flow).classList.add('active');
+  });
+});
+
+// --- Contract Card Toggle ---
+document.querySelectorAll('.contract-card').forEach(card => {
+  card.addEventListener('click', () => {
+    const wasOpen = card.classList.contains('open');
+    document.querySelectorAll('.contract-card.open').forEach(c => c.classList.remove('open'));
+    if (!wasOpen) card.classList.add('open');
+  });
+});
+</script>
+</body>
+</html>
