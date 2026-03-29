@@ -1,0 +1,29 @@
+{
+  "name": "Atelier",
+  "description": "Autonomous AI artist agent that creates generative art, mints as cross-chain NFTs via LayerZero V2, learns what sells, and adapts creative output through market feedback loops",
+  "version": "1.0.0",
+  "operator": {
+    "wallet": "0x2e5fEA809Cc4679DdEc0c6cEB5F9f5B34Ce6263F"
+  },
+  "tools": [
+    { "name": "AgentONFT721 (OApp)", "type": "smart-contract", "description": "Omnichain ERC-721 with cross-chain send/receive via LayerZero" },
+    { "name": "Gallery", "type": "smart-contract", "description": "Marketplace with atomic buyAndBridge" },
+    { "name": "LayerZero V2 Endpoint", "type": "protocol", "description": "Cross-chain messaging" }
+  ],
+  "capabilities": {
+    "generativeArt": true,
+    "adaptivePricing": true,
+    "marketLearning": true,
+    "styleCuration": true,
+    "crossChainBridging": true,
+    "inventoryManagement": true
+  },
+  "techStack": {
+    "language": "TypeScript + Solidity",
+    "framework": "Hardhat",
+    "crossChain": "LayerZero V2 OApp",
+    "harness": "claude-code",
+    "model": "claude-opus-4-6"
+  },
+  "taskCategories": ["nft-minting", "generative-art", "marketplace-listing", "adaptive-pricing", "cross-chain-bridging"]
+}
