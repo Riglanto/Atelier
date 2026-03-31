@@ -1,0 +1,21 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap');
+
+body {
+  margin: 0;
+  background: #0c0c0e;
+  color: #e2e8f0;
+  font-family: 'Roboto', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+* {
+  border-radius: 0 !important;
+}
+
+.lz-pill { border-radius: 2px !important; }
+.lz-circle { border-radius: 50% !important; }
